@@ -18,11 +18,7 @@ namespace GymManagmentDAL.Repositories.Classes
             _context = context;
         }
 
-        public IEnumerable<TEntity> GetAll()
-        {
-            return _context.Set<TEntity>().AsNoTracking().ToList();
-        }
-
+      
         public TEntity? GetById(int id)
         {
             return _context.Set<TEntity>().FirstOrDefault(e => e.Id == id);
@@ -46,6 +42,13 @@ namespace GymManagmentDAL.Repositories.Classes
             return _context.SaveChanges();
         }
 
+        public IEnumerable<TEntity> GetAll(Func<TEntity, bool>? condition = null)
+        {
+            if (condition == null) { return _context.Set<TEntity>().AsNoTracking().ToList(); }
+            else   {return _context.Set<TEntity>().AsNoTracking().Where(condition).ToList(); }
 
+
+
+        }
     }
 }
