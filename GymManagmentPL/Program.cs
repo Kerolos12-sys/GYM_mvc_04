@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using GymManagmentDAL.Data.Contexts;
 using Microsoft.AspNetCore.Identity;
+using GymManagmentDAL.Repositories.Interfaces;
 namespace GymManagmentPL
 {
     public class Program
@@ -19,6 +20,8 @@ namespace GymManagmentPL
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
             });
+
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(IGenericRepository<>));
                     
                     
             

@@ -30,11 +30,7 @@ namespace GymManagmentDAL.Repositories.Classes
                            .FirstOrDefault(p => p.Id == id);
         }
 
-        public int Add(Plan plan)
-        {
-            _context.Plans.Add(plan);
-            return _context.SaveChanges();
-        }
+      
 
         public int Update(Plan plan)
         {
@@ -42,16 +38,7 @@ namespace GymManagmentDAL.Repositories.Classes
             return _context.SaveChanges();
         }
 
-        public int Delete(int id)
-        {
-            var plan = _context.Plans.Find(id);
-            if (plan != null)
-            {
-                _context.Plans.Remove(plan);
-                return _context.SaveChanges();
-            }
-            return 0;
-        }
+    
     }
 
 }

@@ -11,9 +11,8 @@ namespace GymManagmentDAL.Repositories.Interfaces
     {
         IEnumerable<Plan> GetAll();
         Plan? GetById(int id);
-        int Add(Plan plan);
         int Update(Plan plan);
-        int Delete(int id);
+        
     }
 
 }
