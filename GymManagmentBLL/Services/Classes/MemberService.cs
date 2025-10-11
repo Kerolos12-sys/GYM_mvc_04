@@ -30,12 +30,30 @@ namespace GymManagmentBLL.Services.Classes
 
         }
 
-
         //1
+        public IEnumerable<MemberViewModel> GetAllMembers()
+        {
+            var   Members=_memberRepository.GetAll();
+            if (Members == null) 
+                return Enumerable.Empty<MemberViewModel>();
+            var MembersViewModels = Members.Select(x => new MemberViewModel
+            {
+
+                Id = x.Id,
+                Name = x.Name,
+                Email = x.Email,
+                Phone = x.Phone,
+                Photo = x.Photo,
+                Gender=x.Gender.ToString(),
+            });
+           
+            return MembersViewModels;
+        }
+        //2
         public bool CreateMember(CreatMemberViewModel creatMember)
         {
             try {
-                var emailExists = _memberRepository.GetAll(x => x.Email == creatMember.Email).Any();
+            var emailExists = _memberRepository.GetAll(x => x.Email == creatMember.Email).Any();
             var phoneExists =_memberRepository.GetAll(x=>x.Phone == creatMember.Phone).Any();
             if (phoneExists||emailExists) { return false; }
 
@@ -74,25 +92,7 @@ namespace GymManagmentBLL.Services.Classes
             catch (Exception ex) { return false; }
         
         }
-        //2
-        public IEnumerable<MemberViewModel> GetAllMembers()
-        {
-            var   Members=_memberRepository.GetAll();
-            if (Members == null) 
-                return Enumerable.Empty<MemberViewModel>();
-            var MembersViewModels = Members.Select(x => new MemberViewModel
-            {
-
-                Id = x.Id,
-                Name = x.Name,
-                Email = x.Email,
-                Phone = x.Phone,
-                Photo = x.Photo,
-                Gender=x.Gender.ToString(),
-            });
-           
-            return MembersViewModels;
-        }
+      
         //3
         public MemberViewModel GetMemberDetails(int MemberId)
         {
@@ -139,7 +139,7 @@ namespace GymManagmentBLL.Services.Classes
 
             };
         }
-        //5
+        //5   عرض البيانات القديمة الي هيتم التعديل عليها 
         public MemberToUpdateViewModel? GetMemberToUpdate(int MemberID)
         {
             
@@ -156,7 +156,7 @@ namespace GymManagmentBLL.Services.Classes
             
             };
         }
-        //6
+        //6 التعديل علي البيانات 
         public bool UpdateMemberDetails(int MemberId, MemberToUpdateViewModel UpdatedMember)
         {
             try
