@@ -138,7 +138,7 @@ namespace GymManagmentBLL.Services.Classes
                 return false;
             }
         }
-
+        //6
         public bool RemoveTrainer(int TrainerId)
         {
             try
