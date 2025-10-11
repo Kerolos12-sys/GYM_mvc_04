@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using GymManagmentDAL.Data.Contexts;
 using Microsoft.AspNetCore.Identity;
 using GymManagmentDAL.Repositories.Interfaces;
+using GymManagmentDAL.Repositories.Classes;
 namespace GymManagmentPL
 {
     public class Program
@@ -22,7 +23,8 @@ namespace GymManagmentPL
             });
 
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(IGenericRepository<>));
-                    
+
+            builder.Services.AddScoped<IPlanRepository,PlanRepository>();
                     
             
             
