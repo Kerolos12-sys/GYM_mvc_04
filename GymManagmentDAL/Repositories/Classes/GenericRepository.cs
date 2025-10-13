@@ -13,6 +13,7 @@ namespace GymManagmentDAL.Repositories.Classes
     {
         private readonly DbContext _context;
 
+
         public GenericRepository(DbContext context)
         {
             _context = context;
