@@ -25,22 +25,22 @@ namespace GymManagmentDAL.Repositories.Classes
             return _context.Set<TEntity>().FirstOrDefault(e => e.Id == id);
         }
 
-        public int Add(TEntity entity)
+        public void Add(TEntity entity)
         {
             _context.Set<TEntity>().Add(entity);
-            return _context.SaveChanges();
+           
         }
 
-        public int Update(TEntity entity)
+        public void Update(TEntity entity)
         {
             _context.Set<TEntity>().Update(entity);
-            return _context.SaveChanges();
+           
         }
 
-        public int Delete(TEntity entity)
+        public void Delete(TEntity entity)
         {
             _context.Set<TEntity>().Remove(entity);
-            return _context.SaveChanges();
+          
         }
 
         public IEnumerable<TEntity> GetAll(Func<TEntity, bool>? condition = null)

@@ -13,27 +13,31 @@ namespace GymManagmentBLL.Services.Classes
     public class MemberService : IMemberService
     {
 
-
+        private readonly IUnitOfWork _unitOfWork;
         
-        private readonly IGenericRepository<Member> _memberRepository;
-        private readonly IGenericRepository<MemberShip> _membershipRepository;
-        private readonly IPlanRepository _planRepository;
-        private readonly IGenericRepository<HealthRecord> _healthRecordRepository;
-        private readonly IGenericRepository<MemberSession> _memberSessionRepository;
-        public MemberService(IGenericRepository<Member> memberRepository,IGenericRepository<MemberShip> membershipRepository,IPlanRepository planRepository,IGenericRepository<HealthRecord> healthRecordRepository,IGenericRepository<MemberSession> memberSessionRepository)
+        //private readonly IGenericRepository<Member> _memberRepository;
+        //private readonly IGenericRepository<MemberShip> _membershipRepository;
+        //private readonly IPlanRepository _planRepository;
+        //private readonly IGenericRepository<HealthRecord> _healthRecordRepository;
+        //private readonly IGenericRepository<MemberSession> _memberSessionRepository;
+        public MemberService( IUnitOfWork unitOfWork)
         {  
-            _memberRepository = memberRepository;
-            _membershipRepository = membershipRepository;
-            _planRepository = planRepository;
-            _healthRecordRepository = healthRecordRepository;
-            _memberSessionRepository = memberSessionRepository;
+            //_memberRepository = memberRepository;
+            //_membershipRepository = membershipRepository;
+            //_planRepository = planRepository;
+            //_healthRecordRepository = healthRecordRepository;
+            //_memberSessionRepository = memberSessionRepository;
+            _unitOfWork = unitOfWork;
 
         }
+
+
+
 
         //1
         public IEnumerable<MemberViewModel> GetAllMembers()
         {
-            var   Members=_memberRepository.GetAll();
+            var   Members=_unitOfWork.GetRepository<Member>().GetAll();
             if (Members == null) 
                 return Enumerable.Empty<MemberViewModel>();
             var MembersViewModels = Members.Select(x => new MemberViewModel
@@ -53,8 +57,8 @@ namespace GymManagmentBLL.Services.Classes
         public bool CreateMember(CreatMemberViewModel creatMember)
         {
             try {
-            var emailExists = _memberRepository.GetAll(x => x.Email == creatMember.Email).Any();
-            var phoneExists =_memberRepository.GetAll(x=>x.Phone == creatMember.Phone).Any();
+            var emailExists = _unitOfWork.GetRepository<Member>().GetAll(x => x.Email == creatMember.Email).Any();
+            var phoneExists = _unitOfWork.GetRepository<Member>().GetAll(x=>x.Phone == creatMember.Phone).Any();
             if (phoneExists||emailExists) { return false; }
 
             var member = new Member()
@@ -85,7 +89,8 @@ namespace GymManagmentBLL.Services.Classes
 
             };
             
-          return   _memberRepository.Add(member)>0;
+               _unitOfWork.GetRepository<Member>().Add(member); //added locally
+                return _unitOfWork.SaveChanges()>0;
            
             }
 
@@ -97,7 +102,7 @@ namespace GymManagmentBLL.Services.Classes
         public MemberViewModel GetMemberDetails(int MemberId)
         {
            
-            var Member=_memberRepository.GetById(MemberId);
+            var Member=_unitOfWork.GetRepository<Member>().GetById(MemberId);
             if (Member == null) { return null; }
             var viewmodel = new MemberViewModel()
             {
@@ -112,13 +117,13 @@ namespace GymManagmentBLL.Services.Classes
 
             };
 
-            var ActiveMemberShip=_membershipRepository.GetAll(x=>x.MemberId==MemberId&&x.Status=="Active").FirstOrDefault();
+            var ActiveMemberShip= _unitOfWork.GetRepository<MemberShip>().GetAll(x=>x.MemberId==MemberId&&x.Status=="Active").FirstOrDefault();
             if (ActiveMemberShip is not null) 
             {
 
                 viewmodel.MemberShipStartDate=ActiveMemberShip.CreatedAt.ToShortDateString();
                 viewmodel.MemberShipEndDate=ActiveMemberShip.EndDate.ToShortDateString();
-                var plan = _planRepository.GetById(ActiveMemberShip.PlanId);
+                var plan = _unitOfWork.GetRepository<Plan>().GetById(ActiveMemberShip.PlanId);
                 viewmodel.PlanName = plan?.Name;
             }
 
@@ -127,7 +132,7 @@ namespace GymManagmentBLL.Services.Classes
         //4
         public HealthRecordViewModel? GetMemberHealthRecordDetails(int MemberId)
         {
-           var memberhealthrecord=_healthRecordRepository.GetById(MemberId);
+           var memberhealthrecord=_unitOfWork.GetRepository<HealthRecord>().GetById(MemberId);
            if(memberhealthrecord == null) {return null; }
             return new HealthRecordViewModel()
             {
@@ -143,7 +148,7 @@ namespace GymManagmentBLL.Services.Classes
         public MemberToUpdateViewModel? GetMemberToUpdate(int MemberID)
         {
             
-            var member=_memberRepository.GetById(MemberID);
+            var member=_unitOfWork.GetRepository<Member>().GetById(MemberID);
             if(member == null) {return null;}
             return new MemberToUpdateViewModel() 
             {
@@ -161,17 +166,21 @@ namespace GymManagmentBLL.Services.Classes
         {
             try
             {
-                var emailexist=_memberRepository.GetAll(x=>x.Email == UpdatedMember.Email).Any();
-                var phoneexist = _memberRepository.GetAll(x => x.Phone == UpdatedMember.Phone).Any();
+                var Repo = _unitOfWork.GetRepository<Member>();
+
+
+                var emailexist= Repo.GetAll(x=>x.Email == UpdatedMember.Email).Any();
+                var phoneexist = Repo.GetAll(x => x.Phone == UpdatedMember.Phone).Any();
                 if(emailexist && phoneexist) { return false; }
-                var membertoupdate = _memberRepository.GetById(MemberId);
+                var membertoupdate = Repo.GetById(MemberId);
                 if(membertoupdate == null) { return false; }
                 membertoupdate.Email = UpdatedMember.Email;
                 membertoupdate.Phone = UpdatedMember.Phone;
                 membertoupdate.Address.BuildingNumber = UpdatedMember.BuildingNumber;
                 membertoupdate.Address.City= UpdatedMember.City;
                 membertoupdate.UpdatedAT=DateTime.Now;
-               return _memberRepository.Update(membertoupdate)>0;
+                Repo.Update(membertoupdate);
+                return _unitOfWork.SaveChanges()>0;
 
 
             }
@@ -183,23 +192,31 @@ namespace GymManagmentBLL.Services.Classes
         public bool RemoveMember(int memberId)
         {
 
-            var member=_memberRepository.GetById(memberId);
+
+            var MemberRepo = _unitOfWork.GetRepository<Member>();
+
+            var member=MemberRepo.GetById(memberId);
             if( member == null ) { return false; }
-            var activemembersession = _memberSessionRepository.GetAll(x => x.MemberId == memberId&& x.Session.StartDate>DateTime.Now).Any();
+            var activemembersession = _unitOfWork.GetRepository<MemberSession>().GetAll(x => x.MemberId == memberId&& x.Session.StartDate>DateTime.Now).Any();
             if(activemembersession) { return false; };
-            var memberships = _membershipRepository.GetAll(x => x.MemberId == memberId);
+
+            var MemberShipRepo= _unitOfWork.GetRepository<MemberShip>();
+
+
+            var memberships = MemberShipRepo.GetAll(x => x.MemberId == memberId);
             try 
             {
                 if (memberships.Any())
                 {
                     foreach (var membership in memberships) 
                     {
-                        _membershipRepository.Delete(membership);
+                        MemberShipRepo.Delete(membership);
                         
                     }
 
                 }
-                return _memberRepository.Delete(member) > 0;
+                MemberRepo.Delete(member);
+               return _unitOfWork.SaveChanges()>0;
             
             }
             catch (Exception ex) { return false; }

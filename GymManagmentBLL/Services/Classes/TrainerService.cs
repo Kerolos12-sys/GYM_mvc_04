@@ -13,22 +13,34 @@ namespace GymManagmentBLL.Services.Classes
 {
     public class TrainerService : ITrainerervice
     {
-        public readonly IGenericRepository<Trainer> _TrainerRepository;
-        public TrainerService(IGenericRepository<Trainer> TrainerRepository)
-        { 
-             
-            _TrainerRepository = TrainerRepository;
-            
-        
-        
+        //public readonly IGenericRepository<Trainer> _TrainerRepository;
+        //public TrainerService(IGenericRepository<Trainer> TrainerRepository)
+        //{ 
+
+        //    _TrainerRepository = TrainerRepository;
+
+
+
+        //}
+
+        private readonly IUnitOfWork _unitOfWork;
+        public TrainerService(IUnitOfWork unitOfWork)
+        {
+
+            _unitOfWork = unitOfWork;
+
         }
+        
+
+   
+
 
 
 
         //1
         public IEnumerable<TrainerViewModel> GetAllTrainers()
         {
-            var Trainers=_TrainerRepository.GetAll();
+            var Trainers=_unitOfWork.GetRepository<Trainer>().GetAll();
             if (Trainers == null) { return null; }
             var TrainersViewModels = Trainers.Select(x => new TrainerViewModel
             {
@@ -49,8 +61,8 @@ namespace GymManagmentBLL.Services.Classes
         {
             try
             {
-                var emailExists = _TrainerRepository.GetAll(x => x.Email == createTrainer.Email).Any();
-                var phoneExists = _TrainerRepository.GetAll(x => x.Phone == createTrainer.Phone).Any();
+                var emailExists = _unitOfWork.GetRepository<Trainer>().GetAll(x => x.Email == createTrainer.Email).Any();
+                var phoneExists = _unitOfWork.GetRepository<Trainer>().GetAll(x => x.Phone == createTrainer.Phone).Any();
                 if (phoneExists || emailExists) { return false; }
                 var Trainer = new Trainer()
                 {
@@ -69,7 +81,8 @@ namespace GymManagmentBLL.Services.Classes
                     Specialties=createTrainer.specialties
 
                 };
-                return _TrainerRepository.Add(Trainer) > 0;
+                _unitOfWork.GetRepository<Trainer>().Add(Trainer);
+                return _unitOfWork.SaveChanges() > 0;
 
             }
             catch (Exception ex) { return false;   }
@@ -80,7 +93,7 @@ namespace GymManagmentBLL.Services.Classes
         //3
         public TrainerViewModel GetTrainerDetails(int TrainerId)
         {
-            var Trainer = _TrainerRepository.GetById(TrainerId);
+            var Trainer = _unitOfWork.GetRepository<Trainer>().GetById(TrainerId);
             if (Trainer == null) { return null; }
             var viewmodel = new TrainerViewModel()
             {
@@ -100,7 +113,7 @@ namespace GymManagmentBLL.Services.Classes
         public TrainerToUpdateViewModel? GetMemberToUpdate(int TrainerID)
         {
 
-            var trainer= _TrainerRepository.GetById(TrainerID);
+            var trainer= _unitOfWork.GetRepository<Trainer>().GetById(TrainerID);
             if (trainer == null) { return null; }
             return new TrainerToUpdateViewModel()
             {
@@ -118,10 +131,10 @@ namespace GymManagmentBLL.Services.Classes
         {
             try
             {
-                var emailexist = _TrainerRepository.GetAll(x => x.Email == UpdatedTrainer.Email).Any();
-                var phoneexist = _TrainerRepository.GetAll(x => x.Phone == UpdatedTrainer.Phone).Any();
+                var emailexist = _unitOfWork.GetRepository<Trainer>().GetAll(x => x.Email == UpdatedTrainer.Email).Any();
+                var phoneexist = _unitOfWork.GetRepository<Trainer>().GetAll(x => x.Phone == UpdatedTrainer.Phone).Any();
                 if (emailexist && phoneexist) { return false; }
-                var trainertoupdate = _TrainerRepository.GetById(TrainerId);
+                var trainertoupdate = _unitOfWork.GetRepository<Trainer>().GetById(TrainerId);
                 if (trainertoupdate == null) { return false; }
                 trainertoupdate.Email = UpdatedTrainer.Email;
                 trainertoupdate.Phone = UpdatedTrainer.Phone;
@@ -129,7 +142,8 @@ namespace GymManagmentBLL.Services.Classes
                 trainertoupdate.Address.City = UpdatedTrainer.City;
                 trainertoupdate.Specialties = UpdatedTrainer.specialties;
                 trainertoupdate.UpdatedAT = DateTime.Now;
-                return _TrainerRepository.Update(trainertoupdate)>0;
+                _unitOfWork.GetRepository<Trainer>().Update(trainertoupdate);
+                return _unitOfWork.SaveChanges()>0;
 
 
             }
@@ -143,7 +157,7 @@ namespace GymManagmentBLL.Services.Classes
         {
             try
             {
-                var trainer = _TrainerRepository.GetById(TrainerId);
+                var trainer = _unitOfWork.GetRepository<Trainer>().GetById(TrainerId);
                 if (trainer == null)
                     return false;
 
@@ -155,7 +169,8 @@ namespace GymManagmentBLL.Services.Classes
                     return false; // Can't delete trainer with future sessions
 
                 // Safe to delete
-                return _TrainerRepository.Delete(trainer) > 0;
+                _unitOfWork.GetRepository<Trainer>().Delete(trainer);
+                return _unitOfWork.SaveChanges() > 0;
             }
             catch (Exception)
             {

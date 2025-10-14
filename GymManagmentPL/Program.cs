@@ -3,6 +3,8 @@ using GymManagmentDAL.Data.Contexts;
 using Microsoft.AspNetCore.Identity;
 using GymManagmentDAL.Repositories.Interfaces;
 using GymManagmentDAL.Repositories.Classes;
+using GymManagmentBLL;
+
 namespace GymManagmentPL
 {
     public class Program
@@ -22,13 +24,16 @@ namespace GymManagmentPL
 
             });
 
-            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(IGenericRepository<>));
+            //builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(IGenericRepository<>));
 
-            builder.Services.AddScoped<IPlanRepository,PlanRepository>();
-                    
-            
-            
-            
+            //builder.Services.AddScoped<IPlanRepository,PlanRepository>();
+
+             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+             builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+            builder.Services.AddAutoMapper(x =>
+            {
+                x.AddProfile(new MappingProfiles());
+            });
             
             
 
