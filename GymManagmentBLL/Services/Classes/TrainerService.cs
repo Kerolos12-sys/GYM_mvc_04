@@ -1,4 +1,5 @@
-﻿using GymManagmentBLL.Services.Interfaces;
+﻿using AutoMapper;
+using GymManagmentBLL.Services.Interfaces;
 using GymManagmentBLL.ViewModels.MemberViewModels;
 using GymManagmentBLL.ViewModels.TrainerViewModels;
 using GymManagmentDAL.Entities;
@@ -13,21 +14,15 @@ namespace GymManagmentBLL.Services.Classes
 {
     public class TrainerService : ITrainerervice
     {
-        //public readonly IGenericRepository<Trainer> _TrainerRepository;
-        //public TrainerService(IGenericRepository<Trainer> TrainerRepository)
-        //{ 
-
-        //    _TrainerRepository = TrainerRepository;
-
-
-
-        //}
+    
 
         private readonly IUnitOfWork _unitOfWork;
-        public TrainerService(IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+        public TrainerService(IUnitOfWork unitOfWork, IMapper mapper)
         {
 
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
 
         }
         
@@ -42,19 +37,7 @@ namespace GymManagmentBLL.Services.Classes
         {
             var Trainers=_unitOfWork.GetRepository<Trainer>().GetAll();
             if (Trainers == null) { return null; }
-            var TrainersViewModels = Trainers.Select(x => new TrainerViewModel
-            {
-
-                Id = x.Id,
-                Email = x.Email,
-                Phone = x.Phone,
-                Specialization = x.Specialties.ToString(),
-                Name = x.Name,
-
-
-
-            });
-            return TrainersViewModels;
+            return _mapper.Map<IEnumerable<TrainerViewModel>>(Trainers);
         }
         //2
         public bool CreateTrainer(CreateTrainerViewModel createTrainer)
@@ -64,24 +47,8 @@ namespace GymManagmentBLL.Services.Classes
                 var emailExists = _unitOfWork.GetRepository<Trainer>().GetAll(x => x.Email == createTrainer.Email).Any();
                 var phoneExists = _unitOfWork.GetRepository<Trainer>().GetAll(x => x.Phone == createTrainer.Phone).Any();
                 if (phoneExists || emailExists) { return false; }
-                var Trainer = new Trainer()
-                {
-                    Email = createTrainer.Email,
-                    Phone = createTrainer.Phone,
-                    Name = createTrainer.Name,
-                    DateOfBirth = createTrainer.DateOfBirth,
-                    Gender = createTrainer.Gender,
-                    Address = new Address()
-                    {
-                        BuildingNumber = createTrainer.BuildingNumber,
-                        City = createTrainer.City,
-                        Street = createTrainer.Street
-
-                    },
-                    Specialties=createTrainer.specialties
-
-                };
-                _unitOfWork.GetRepository<Trainer>().Add(Trainer);
+                var trainer = _mapper.Map<Trainer>(createTrainer);
+                _unitOfWork.GetRepository<Trainer>().Add(trainer);
                 return _unitOfWork.SaveChanges() > 0;
 
             }
@@ -95,19 +62,7 @@ namespace GymManagmentBLL.Services.Classes
         {
             var Trainer = _unitOfWork.GetRepository<Trainer>().GetById(TrainerId);
             if (Trainer == null) { return null; }
-            var viewmodel = new TrainerViewModel()
-            {
-                Name = Trainer.Name,
-                Email = Trainer.Email,
-                Phone = Trainer.Phone,
-                DateOfBirth = Trainer.DateOfBirth.ToString(),
-                Address = $"{Trainer.Address.BuildingNumber}-{Trainer.Address.Street}-{Trainer.Address.City}",
-                Specialization=Trainer.Specialties.ToString(),
-
-            };
-
-         
-            return viewmodel;
+            return _mapper.Map<TrainerViewModel>(Trainer);
         }
         //4 عرض البيانات القديمة 
         public TrainerToUpdateViewModel? GetMemberToUpdate(int TrainerID)
@@ -115,16 +70,7 @@ namespace GymManagmentBLL.Services.Classes
 
             var trainer= _unitOfWork.GetRepository<Trainer>().GetById(TrainerID);
             if (trainer == null) { return null; }
-            return new TrainerToUpdateViewModel()
-            {
-                Email = trainer.Email,
-                Phone = trainer.Phone,
-                BuildingNumber = trainer.Address.BuildingNumber,
-                City = trainer.Address.City,
-                Street = trainer.Address.Street,
-                specialties=trainer.Specialties,
-
-            };
+            return _mapper.Map<TrainerToUpdateViewModel>(trainer);
         }
         //5  التعديل علي البيانات
         public bool UpdateTrainerDetails(int TrainerId, TrainerToUpdateViewModel UpdatedTrainer)

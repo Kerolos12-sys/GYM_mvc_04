@@ -12,7 +12,7 @@ namespace GymManagmentDAL.Entities
         
         public string Description { get; set; } 
 
-        public string DurationDays { get; set; }
+        public int DurationDays { get; set; }
 
         public decimal Price { get; set; }
 
