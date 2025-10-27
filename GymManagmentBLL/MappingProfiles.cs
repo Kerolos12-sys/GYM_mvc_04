@@ -47,7 +47,15 @@ namespace GymManagmentBLL
                     Note = src.HealthRecordViewModel.Note
                 }));
 
-            CreateMap<Member, MemberToUpdateViewModel>().ReverseMap();
+            CreateMap<Member, MemberToUpdateViewModel>()
+               .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Address.City))
+               .ForMember(dest => dest.Street, opt => opt.MapFrom(src => src.Address.Street))
+               .ForMember(dest => dest.BuildingNumber, opt => opt.MapFrom(src => src.Address.BuildingNumber))
+               .ReverseMap()
+               .ForPath(dest => dest.Address.City, opt => opt.MapFrom(src => src.City))
+               .ForPath(dest => dest.Address.Street, opt => opt.MapFrom(src => src.Street))
+               .ForPath(dest => dest.Address.BuildingNumber, opt => opt.MapFrom(src => src.BuildingNumber));
+
 
             CreateMap<HealthRecord, HealthRecordViewModel>()
                 .ForMember(dest => dest.Weight, opt => opt.MapFrom(src => src.Width))

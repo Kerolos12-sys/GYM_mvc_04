@@ -43,7 +43,7 @@ namespace GymManagmentDAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("GymManagmentDAL.Entities.HealthRecord", b =>
@@ -62,6 +62,7 @@ namespace GymManagmentDAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAT")
+                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Width")
@@ -111,6 +112,7 @@ namespace GymManagmentDAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAT")
+                        .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -121,7 +123,7 @@ namespace GymManagmentDAL.Migrations
                     b.HasIndex("Phone")
                         .IsUnique();
 
-                    b.ToTable("Member", t =>
+                    b.ToTable("Members", t =>
                         {
                             t.HasCheckConstraint("GymUserValidEmailCheck", "Email LIKE '_%@_%._%'");
 
@@ -153,7 +155,7 @@ namespace GymManagmentDAL.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("MemberSession");
+                    b.ToTable("MemberSessions");
                 });
 
             modelBuilder.Entity("GymManagmentDAL.Entities.MemberShip", b =>
@@ -194,23 +196,12 @@ namespace GymManagmentDAL.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateOnly>("DateOfBirth")
-                        .HasColumnType("date");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar");
 
-                    b.Property<string>("DurationDays")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Gender")
+                    b.Property<int>("DurationDays")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -221,10 +212,6 @@ namespace GymManagmentDAL.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar");
 
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal>("Price")
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
@@ -234,7 +221,7 @@ namespace GymManagmentDAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Plan", t =>
+                    b.ToTable("Plans", t =>
                         {
                             t.HasCheckConstraint("PlanDurationCheck", "DurationDays BETWEEN 1 AND 365");
                         });
@@ -279,7 +266,7 @@ namespace GymManagmentDAL.Migrations
 
                     b.HasIndex("TrainerId");
 
-                    b.ToTable("Session", t =>
+                    b.ToTable("Sessions", t =>
                         {
                             t.HasCheckConstraint("SessionCapacityCheck", "Capacity BETWEEN 1 AND 25");
 
@@ -336,7 +323,7 @@ namespace GymManagmentDAL.Migrations
                     b.HasIndex("Phone")
                         .IsUnique();
 
-                    b.ToTable("Trainer", t =>
+                    b.ToTable("Trainers", t =>
                         {
                             t.HasCheckConstraint("GymUserValidEmailCheck", "Email LIKE '_%@_%._%'")
                                 .HasName("GymUserValidEmailCheck1");
@@ -380,7 +367,7 @@ namespace GymManagmentDAL.Migrations
 
                             b1.HasKey("MemberId");
 
-                            b1.ToTable("Member");
+                            b1.ToTable("Members");
 
                             b1.WithOwner()
                                 .HasForeignKey("MemberId");
@@ -428,36 +415,6 @@ namespace GymManagmentDAL.Migrations
                     b.Navigation("Plan");
                 });
 
-            modelBuilder.Entity("GymManagmentDAL.Entities.Plan", b =>
-                {
-                    b.OwnsOne("GymManagmentDAL.Entities.Address", "Address", b1 =>
-                        {
-                            b1.Property<int>("PlanId")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("BuildingNumber")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("City")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.Property<string>("Street")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("PlanId");
-
-                            b1.ToTable("Plan");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PlanId");
-                        });
-
-                    b.Navigation("Address")
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("GymManagmentDAL.Entities.Session", b =>
                 {
                     b.HasOne("GymManagmentDAL.Entities.Category", "SessionCategory")
@@ -502,7 +459,7 @@ namespace GymManagmentDAL.Migrations
 
                             b1.HasKey("TrainerId");
 
-                            b1.ToTable("Trainer");
+                            b1.ToTable("Trainers");
 
                             b1.WithOwner()
                                 .HasForeignKey("TrainerId");

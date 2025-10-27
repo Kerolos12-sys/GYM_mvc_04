@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using GymManagmentDAL.Repositories.Interfaces;
 using GymManagmentDAL.Repositories.Classes;
 using GymManagmentBLL;
+using GymManagmentBLL.Services.Interfaces;
+using GymManagmentBLL.Services.Classes;
 
 namespace GymManagmentPL
 {
@@ -30,12 +32,13 @@ namespace GymManagmentPL
 
              builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
              builder.Services.AddScoped<ISessionRepository, SessionRepository>();
-            builder.Services.AddAutoMapper(x =>
-            {
+             builder.Services.AddAutoMapper(x =>
+             {
                 x.AddProfile(new MappingProfiles());
-            });
-            
-            
+             });
+             builder.Services.AddScoped<IMemberService, MemberService>();
+             builder.Services.AddScoped<IPlanService, PLanService>();
+             builder.Services.AddScoped<ISessionService, SessionService>();
 
 
             var app = builder.Build();

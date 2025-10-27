@@ -104,8 +104,8 @@ namespace GymManagmentBLL.Services.Classes
                 var Repo = _unitOfWork.GetRepository<EntityMember>();
 
 
-                var emailexist= Repo.GetAll(x=>x.Email == UpdatedMember.Email).Any();
-                var phoneexist = Repo.GetAll(x => x.Phone == UpdatedMember.Phone).Any();
+                var emailexist= Repo.GetAll(x=>x.Email == UpdatedMember.Email && x.Id!=MemberId).Any();
+                var phoneexist = Repo.GetAll(x => x.Phone == UpdatedMember.Phone && x.Id != MemberId).Any();
                 if (emailexist && phoneexist) { return false; }
                 var membertoupdate = Repo.GetById(MemberId);
                 if(membertoupdate == null) { return false; }
@@ -135,8 +135,20 @@ namespace GymManagmentBLL.Services.Classes
 
             var member=MemberRepo.GetById(memberId);
             if( member == null ) { return false; }
-            var activemembersession = _unitOfWork.GetRepository<MemberSession>().GetAll(x => x.MemberId == memberId&& x.Session.StartDate>DateTime.Now).Any();
-            if(activemembersession) { return false; };
+
+
+
+
+            var sessionIds = _unitOfWork.GetRepository<MemberSession>()
+            .GetAll(condition: b => b.MemberId == memberId)
+            .Select(x => x.SessionId);
+
+            var hasFutureSessions = _unitOfWork.GetRepository<Session>()
+                .GetAll(condition: x => sessionIds.Contains(x.Id) && x.StartDate > DateTime.Now)
+                .Any();
+
+            if (hasFutureSessions)
+                return false;
 
             var MemberShipRepo= _unitOfWork.GetRepository<MemberShip>();
 

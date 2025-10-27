@@ -32,7 +32,7 @@ namespace GymManagmentDAL.Data.Contexts
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
         public DbSet<Member> Members { get; set; }
-        public DbSet<GymUser> GymUsers { get; set; }
+        public DbSet<GymUser> GymUser { get; set; }
 
         public DbSet<HealthRecord> HealthRecords { get; set; }
 

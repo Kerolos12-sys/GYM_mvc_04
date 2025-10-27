@@ -14,7 +14,7 @@ using static System.Collections.Specialized.BitVector32;
 
 namespace GymManagmentBLL.Services.Classes
 {
-    internal class SessionService : ISessionService
+    public class SessionService : ISessionService
     {
 
         public readonly IUnitOfWork _unitOfWork;

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GymManagmentDAL.Entities
 {
-    public class Plan :GymUser
+    public class Plan : BaseEntity
     {
         public string Name { get; set; }
         
