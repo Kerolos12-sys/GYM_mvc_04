@@ -65,15 +65,13 @@ namespace GymManagmentBLL.Services.Classes
                 _unitOfWork.GetRepository<EntityMember>().Add(MemberEntity);
                 var IsCreated = _unitOfWork.SaveChanges() > 0;
 
-                if (IsCreated)
+                if (!IsCreated)
                 {
+                    // لو فشل الحفظ احذف الصورة لأن العملية فشلت
                     _attachmentService.Delete(fileName: PhotoName, folderName: "members");
-                    return false;
                 }
-                else
-                {
-                    return IsCreated; // (هنا القيمة ستكون false)
-                }
+
+                return IsCreated;
             }
 
             catch (Exception ex) { return false; }
