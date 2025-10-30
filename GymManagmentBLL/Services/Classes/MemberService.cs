@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.Execution;
+using GymManagmentBLL.Services.AttachmentService;
 using GymManagmentBLL.Services.Interfaces;
 using GymManagmentBLL.ViewModels.MemberViewModels;
 using GymManagmentDAL.Entities;
@@ -18,12 +19,14 @@ namespace GymManagmentBLL.Services.Classes
 
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public MemberService( IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly IAttachmentService _attachmentService;
+
+        public MemberService( IUnitOfWork unitOfWork, IMapper mapper,IAttachmentService attachmentService)
         {  
          
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-
+            _attachmentService = attachmentService;
         }
         
 
@@ -49,11 +52,29 @@ namespace GymManagmentBLL.Services.Classes
             var phoneExists = _unitOfWork.GetRepository<EntityMember>().GetAll(x=>x.Phone == creatMember.Phone).Any();
             if (phoneExists||emailExists) { return false; }
 
-                var member = _mapper.Map<EntityMember>(creatMember);
-                _unitOfWork.GetRepository<EntityMember>().Add(member);
-                return _unitOfWork.SaveChanges() > 0;
 
+
+
+                var PhotoName = _attachmentService.Upload("members", creatMember.PhotoFile);
+                if (string.IsNullOrEmpty(PhotoName))
+                    return false;
+
+                // If Not Add Member And Return True If added
+                var MemberEntity = _mapper.Map<EntityMember>(creatMember);
+                MemberEntity.Photo = PhotoName;
+                _unitOfWork.GetRepository<EntityMember>().Add(MemberEntity);
+                var IsCreated = _unitOfWork.SaveChanges() > 0;
+
+                if (IsCreated)
+                {
+                    _attachmentService.Delete(fileName: PhotoName, folderName: "members");
+                    return false;
                 }
+                else
+                {
+                    return IsCreated; // (هنا القيمة ستكون false)
+                }
+            }
 
             catch (Exception ex) { return false; }
         
@@ -166,8 +187,12 @@ namespace GymManagmentBLL.Services.Classes
 
                 }
                 MemberRepo.Delete(member);
-               return _unitOfWork.SaveChanges()>0;
-            
+               var IsDeletde= _unitOfWork.SaveChanges()>0;
+                if(IsDeletde) 
+                    _attachmentService.Delete(fileName: member.Photo, folderName: "members");
+                return IsDeletde;
+                
+
             }
             catch (Exception ex) { return false; }
 

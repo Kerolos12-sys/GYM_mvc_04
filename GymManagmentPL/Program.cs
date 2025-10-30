@@ -6,6 +6,7 @@ using GymManagmentDAL.Repositories.Classes;
 using GymManagmentBLL;
 using GymManagmentBLL.Services.Interfaces;
 using GymManagmentBLL.Services.Classes;
+using GymManagmentBLL.Services.AttachmentService;
 
 namespace GymManagmentPL
 {
@@ -39,7 +40,7 @@ namespace GymManagmentPL
              builder.Services.AddScoped<IMemberService, MemberService>();
              builder.Services.AddScoped<IPlanService, PLanService>();
              builder.Services.AddScoped<ISessionService, SessionService>();
-
+             builder.Services.AddScoped<IAttachmentService, AttachmentService>();
 
             var app = builder.Build();
 
